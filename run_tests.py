@@ -17,6 +17,7 @@ def run_skill(skill_name, action, params):
         'fusion-desktop': f'{PROJECT_DIR}/skills/fusion-desktop/scripts/desktop.py',
         'fusion-screen': f'{PROJECT_DIR}/skills/fusion-screen/scripts/screen.py',
         'fusion-browser': f'{PROJECT_DIR}/skills/fusion-browser/scripts/browser.js',
+        'fusion-browser-win': f'C:/tmp/browser_win.js',
         'fusion-clipboard': f'{PROJECT_DIR}/skills/fusion-clipboard/scripts/clipboard.py',
         'fusion-window': f'{PROJECT_DIR}/skills/fusion-window/scripts/window.py'
     }
@@ -35,7 +36,12 @@ def run_skill(skill_name, action, params):
     env['XAUTHORITY'] = os.path.expanduser('~/.Xauthority')
     
     try:
-        if script_path.endswith('.py'):
+        if skill_name == 'fusion-browser-win':
+            result = subprocess.run(
+                ['/mnt/c/Windows/System32/cmd.exe', '/c', 'node', 'C:\\tmp\\browser_win.js', action, params_file.name],
+                capture_output=True, text=True, timeout=60
+            )
+        elif script_path.endswith('.py'):
             result = subprocess.run(
                 ['python3', script_path, action, params_file.name],
                 capture_output=True, text=True, timeout=60, env=env
@@ -196,8 +202,8 @@ def test_browser():
     print('\n=== 测试5: 浏览器自动化 ===\n')
     scores = {'trae': 0, 'openclaw': 85, 'opensource': 80, 'fusion': 0}
     
-    print('场景A: 打开网页')
-    result = run_skill('fusion-browser', 'open', {'url': 'https://example.com', 'headless': True})
+    print('场景A: 打开网页 (Windows原生)')
+    result = run_skill('fusion-browser-win', 'open', {'url': 'https://example.com', 'headless': True})
     if result.get('status') == 'success':
         scores['fusion'] += 40
         print(f"Fusion: ✅ 打开网页成功 - {result.get('title')}")
@@ -205,7 +211,7 @@ def test_browser():
         print(f"Fusion: ❌ 打开网页失败 - {result.get('message', '')[:100]}")
     
     print('\n场景B: 截图')
-    result = run_skill('fusion-browser', 'screenshot', {'path': '/tmp/browser_test.png'})
+    result = run_skill('fusion-browser-win', 'screenshot', {'path': 'C:/tmp/browser_test.png'})
     if result.get('status') == 'success':
         scores['fusion'] += 30
         print(f"Fusion: ✅ 浏览器截图成功")
@@ -213,7 +219,7 @@ def test_browser():
         print(f"Fusion: ❌ 浏览器截图失败")
     
     print('\n场景C: 关闭浏览器')
-    result = run_skill('fusion-browser', 'close', {})
+    result = run_skill('fusion-browser-win', 'close', {})
     if result.get('status') == 'success':
         scores['fusion'] += 30
         print(f"Fusion: ✅ 关闭浏览器成功")
