@@ -7,6 +7,11 @@ import tempfile
 
 PROJECT_DIR = '/mnt/c/tmp/openclaw-desktop-fusion'
 
+os.environ['DISPLAY'] = ':0'
+os.environ['XDG_RUNTIME_DIR'] = '/mnt/wslg/runtime-dir'
+os.environ['WAYLAND_DISPLAY'] = 'wayland-0'
+os.environ['XAUTHORITY'] = os.path.expanduser('~/.Xauthority')
+
 def run_skill(skill_name, action, params):
     script_paths = {
         'fusion-desktop': f'{PROJECT_DIR}/skills/fusion-desktop/scripts/desktop.py',
@@ -23,16 +28,22 @@ def run_skill(skill_name, action, params):
     json.dump(params, params_file)
     params_file.close()
     
+    env = os.environ.copy()
+    env['DISPLAY'] = ':0'
+    env['XDG_RUNTIME_DIR'] = '/mnt/wslg/runtime-dir'
+    env['WAYLAND_DISPLAY'] = 'wayland-0'
+    env['XAUTHORITY'] = os.path.expanduser('~/.Xauthority')
+    
     try:
         if script_path.endswith('.py'):
             result = subprocess.run(
                 ['python3', script_path, action, params_file.name],
-                capture_output=True, text=True, timeout=30
+                capture_output=True, text=True, timeout=60, env=env
             )
         else:
             result = subprocess.run(
                 ['node', script_path, action, params_file.name],
-                capture_output=True, text=True, timeout=30
+                capture_output=True, text=True, timeout=120, env=env
             )
         try:
             os.unlink(params_file.name)
@@ -42,9 +53,9 @@ def run_skill(skill_name, action, params):
             try:
                 return json.loads(result.stdout)
             except:
-                return {'status': 'error', 'output': result.stdout}
+                return {'status': 'error', 'output': result.stdout, 'stderr': result.stderr[:500] if result.stderr else ''}
         else:
-            return {'status': 'error', 'message': result.stderr[:200] if result.stderr else 'Unknown error'}
+            return {'status': 'error', 'message': result.stderr[:500] if result.stderr else 'Unknown error', 'stdout': result.stdout[:500] if result.stdout else ''}
     except Exception as e:
         return {'status': 'error', 'message': str(e)}
 

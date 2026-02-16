@@ -2,12 +2,40 @@ import json
 import sys
 import os
 import platform
+import subprocess
+
+def _copy_to_clipboard(text):
+    if platform.system() == 'Linux':
+        process = subprocess.Popen(
+            ['xclip', '-selection', 'clipboard', '-i'],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+        process.communicate(text.encode('utf-8'), timeout=5)
+        return process.returncode == 0
+    else:
+        import pyperclip
+        pyperclip.copy(text)
+        return True
+
+def _get_from_clipboard():
+    if platform.system() == 'Linux':
+        result = subprocess.run(
+            ['xclip', '-selection', 'clipboard', '-o'],
+            capture_output=True, text=True, timeout=5
+        )
+        if result.returncode == 0:
+            return result.stdout
+        return ''
+    else:
+        import pyperclip
+        return pyperclip.paste()
 
 def copy_text(params):
     text = params.get('text', '')
     try:
-        import pyperclip
-        pyperclip.copy(text)
+        _copy_to_clipboard(text)
         return {
             'status': 'success',
             'action': 'copy',
@@ -19,8 +47,7 @@ def copy_text(params):
 
 def paste_text(params):
     try:
-        import pyperclip
-        text = pyperclip.paste()
+        text = _get_from_clipboard()
         return {
             'status': 'success',
             'action': 'paste',
@@ -32,8 +59,7 @@ def paste_text(params):
 
 def get_clipboard(params):
     try:
-        import pyperclip
-        text = pyperclip.paste()
+        text = _get_from_clipboard()
         return {
             'status': 'success',
             'action': 'get',
@@ -45,8 +71,7 @@ def get_clipboard(params):
 
 def clear_clipboard(params):
     try:
-        import pyperclip
-        pyperclip.copy('')
+        _copy_to_clipboard('')
         return {'status': 'success', 'action': 'clear'}
     except Exception as e:
         return {'status': 'error', 'action': 'clear', 'message': str(e)}

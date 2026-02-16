@@ -11,23 +11,39 @@ pyautogui.FAILSAFE = True
 pyautogui.PAUSE = 0.1
 
 def screenshot(params):
-    path = params.get('path', 'C:/tmp/screenshot.png')
+    path = params.get('path', '/tmp/screenshot.png')
     region = params.get('region', None)
     try:
-        if region:
-            x, y, w, h = region
-            img = pyautogui.screenshot(region=(x, y, w, h))
+        if platform.system() == 'Linux':
+            if region:
+                x, y, w, h = region
+                subprocess.run(['scrot', '-a', f'{x},{y},{w},{h}', path], check=True, capture_output=True, timeout=10)
+            else:
+                subprocess.run(['scrot', path], check=True, capture_output=True, timeout=10)
+            img = Image.open(path)
+            return {
+                'status': 'success',
+                'action': 'screenshot',
+                'path': path,
+                'width': img.width,
+                'height': img.height,
+                'region': region
+            }
         else:
-            img = pyautogui.screenshot()
-        img.save(path)
-        return {
-            'status': 'success',
-            'action': 'screenshot',
-            'path': path,
-            'width': img.width,
-            'height': img.height,
-            'region': region
-        }
+            if region:
+                x, y, w, h = region
+                img = pyautogui.screenshot(region=(x, y, w, h))
+            else:
+                img = pyautogui.screenshot()
+            img.save(path)
+            return {
+                'status': 'success',
+                'action': 'screenshot',
+                'path': path,
+                'width': img.width,
+                'height': img.height,
+                'region': region
+            }
     except Exception as e:
         return {'status': 'error', 'action': 'screenshot', 'message': str(e)}
 

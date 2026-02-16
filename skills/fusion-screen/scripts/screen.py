@@ -2,18 +2,42 @@ import pyautogui
 import json
 import sys
 import os
+import platform
+import subprocess
 from PIL import Image
 import io
 import base64
 
+def _take_screenshot(region=None):
+    if platform.system() == 'Linux':
+        path = '/tmp/scrot_screenshot.png'
+        try:
+            if region:
+                x, y, w, h = region
+                subprocess.run(['scrot', '-a', f'{x},{y},{w},{h}', path], check=True, capture_output=True, timeout=10)
+            else:
+                subprocess.run(['scrot', path], check=True, capture_output=True, timeout=10)
+            img = Image.open(path)
+            img.load()
+            return img
+        except Exception as e:
+            raise e
+        finally:
+            if os.path.exists(path):
+                try:
+                    os.unlink(path)
+                except:
+                    pass
+    else:
+        if region:
+            x, y, w, h = region
+            return pyautogui.screenshot(region=(x, y, w, h))
+        return pyautogui.screenshot()
+
 def screenshot_base64(params):
     region = params.get('region', None)
     try:
-        if region:
-            x, y, w, h = region
-            img = pyautogui.screenshot(region=(x, y, w, h))
-        else:
-            img = pyautogui.screenshot()
+        img = _take_screenshot(region)
         buffer = io.BytesIO()
         img.save(buffer, format='PNG')
         img_base64 = base64.b64encode(buffer.getvalue()).decode()
@@ -31,11 +55,7 @@ def screenshot_base64(params):
 def ocr(params):
     region = params.get('region', None)
     try:
-        if region:
-            x, y, w, h = region
-            img = pyautogui.screenshot(region=(x, y, w, h))
-        else:
-            img = pyautogui.screenshot()
+        img = _take_screenshot(region)
         try:
             import pytesseract
             text = pytesseract.image_to_string(img, lang='chi_sim+eng')
@@ -106,7 +126,7 @@ def find_all(params):
 
 def analyze(params):
     try:
-        img = pyautogui.screenshot()
+        img = _take_screenshot()
         return {
             'status': 'success',
             'action': 'analyze',
@@ -134,7 +154,8 @@ def pixel_at(params):
     x = params.get('x', 0)
     y = params.get('y', 0)
     try:
-        color = pyautogui.pixel(x, y)
+        img = _take_screenshot(region=[x, y, 1, 1])
+        color = img.getpixel((0, 0))[:3]
         return {
             'status': 'success',
             'action': 'pixel_at',

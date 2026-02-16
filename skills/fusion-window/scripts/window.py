@@ -2,51 +2,96 @@ import json
 import sys
 import os
 import platform
+import subprocess
+import re
+
+def _get_windows_linux():
+    result = subprocess.run(['wmctrl', '-l'], capture_output=True, text=True)
+    windows = []
+    for line in result.stdout.strip().split('\n'):
+        if line:
+            parts = line.split(None, 3)
+            if len(parts) >= 4:
+                windows.append({
+                    'id': parts[0],
+                    'desktop': parts[1],
+                    'host': parts[2],
+                    'title': parts[3]
+                })
+    return windows
 
 def list_windows(params):
     try:
-        import pygetwindow as gw
-        windows = gw.getAllWindows()
-        result = []
-        for w in windows:
-            if w.title:
+        if platform.system() == 'Linux':
+            windows = _get_windows_linux()
+            result = []
+            for w in windows:
                 result.append({
-                    'title': w.title,
-                    'left': w.left,
-                    'top': w.top,
-                    'width': w.width,
-                    'height': w.height,
-                    'active': w.isActive
+                    'title': w['title'],
+                    'id': w['id']
                 })
-        return {
-            'status': 'success',
-            'action': 'list',
-            'count': len(result),
-            'windows': result
-        }
+            return {
+                'status': 'success',
+                'action': 'list',
+                'count': len(result),
+                'windows': result
+            }
+        else:
+            import pygetwindow as gw
+            windows = gw.getAllWindows()
+            result = []
+            for w in windows:
+                if w.title:
+                    result.append({
+                        'title': w.title,
+                        'left': w.left,
+                        'top': w.top,
+                        'width': w.width,
+                        'height': w.height,
+                        'active': w.isActive
+                    })
+            return {
+                'status': 'success',
+                'action': 'list',
+                'count': len(result),
+                'windows': result
+            }
     except Exception as e:
         return {'status': 'error', 'action': 'list', 'message': str(e)}
 
 def find_window(params):
     title = params.get('title', '')
     try:
-        import pygetwindow as gw
-        windows = gw.getWindowsWithTitle(title)
-        if windows:
-            w = windows[0]
-            return {
-                'status': 'success',
-                'action': 'find',
-                'found': True,
-                'title': w.title,
-                'left': w.left,
-                'top': w.top,
-                'width': w.width,
-                'height': w.height,
-                'active': w.isActive
-            }
-        else:
+        if platform.system() == 'Linux':
+            windows = _get_windows_linux()
+            for w in windows:
+                if title.lower() in w['title'].lower():
+                    return {
+                        'status': 'success',
+                        'action': 'find',
+                        'found': True,
+                        'title': w['title'],
+                        'id': w['id']
+                    }
             return {'status': 'success', 'action': 'find', 'found': False}
+        else:
+            import pygetwindow as gw
+            windows = gw.getWindowsWithTitle(title)
+            if windows:
+                w = windows[0]
+                return {
+                    'status': 'success',
+                    'action': 'find',
+                    'found': True,
+                    'title': w.title,
+                    'left': w.left,
+                    'top': w.top,
+                    'width': w.width,
+                    'height': w.height,
+                    'active': w.isActive
+                }
+            else:
+                return {'status': 'success', 'action': 'find', 'found': False}
     except Exception as e:
         return {'status': 'error', 'action': 'find', 'message': str(e)}
 

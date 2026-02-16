@@ -1,33 +1,33 @@
 {
-  "timestamp": "2026-02-16 14:14:03",
+  "timestamp": "2026-02-16 16:09:50",
   "results": [
     {
       "test": "截图能力",
       "trae": 0,
       "openclaw": 80,
       "opensource": 85,
-      "fusion": 0
+      "fusion": 100
     },
     {
       "test": "鼠标控制",
       "trae": 0,
       "openclaw": 85,
       "opensource": 90,
-      "fusion": 0
+      "fusion": 100
     },
     {
       "test": "键盘控制",
       "trae": 0,
       "openclaw": 75,
       "opensource": 85,
-      "fusion": 0
+      "fusion": 100
     },
     {
       "test": "图像识别",
       "trae": 0,
       "openclaw": 60,
       "opensource": 80,
-      "fusion": 0
+      "fusion": 100
     },
     {
       "test": "浏览器自动化",
@@ -41,28 +41,28 @@
       "trae": 0,
       "openclaw": 50,
       "opensource": 85,
-      "fusion": 0
+      "fusion": 100
     },
     {
       "test": "窗口管理",
       "trae": 0,
       "openclaw": 40,
       "opensource": 80,
-      "fusion": 0
+      "fusion": 100
     },
     {
       "test": "综合自动化",
       "trae": 0,
       "openclaw": 70,
       "opensource": 75,
-      "fusion": 0
+      "fusion": 50
     }
   ],
   "totals": {
     "trae": 0,
     "openclaw": 545,
     "opensource": 660,
-    "fusion": 30
+    "fusion": 680
   },
-  "exceed": false
+  "exceed": true
 }
