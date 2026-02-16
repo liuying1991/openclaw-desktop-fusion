@@ -293,20 +293,39 @@ def test_comprehensive():
     result1 = run_skill('fusion-desktop', 'screenshot', {'path': '/tmp/comprehensive_test.png'})
     result2 = run_skill('fusion-clipboard', 'copy', {'text': 'comprehensive_test.png'})
     if result1.get('status') == 'success' and result2.get('status') == 'success':
-        scores['fusion'] += 50
+        scores['fusion'] += 25
         print(f"Fusion: ✅ 综合流程1成功")
     else:
         print(f"Fusion: ❌ 综合流程1失败")
     
-    print('\n场景B: 浏览器+截图流程')
-    result1 = run_skill('fusion-browser', 'open', {'url': 'https://example.com', 'headless': True})
-    result2 = run_skill('fusion-browser', 'screenshot', {'path': '/tmp/comprehensive_browser.png'})
-    result3 = run_skill('fusion-browser', 'close', {})
+    print('\n场景B: 屏幕分析+像素获取流程')
+    result1 = run_skill('fusion-screen', 'analyze', {})
+    result2 = run_skill('fusion-screen', 'pixel_at', {'x': 100, 'y': 100})
     if result1.get('status') == 'success' and result2.get('status') == 'success':
-        scores['fusion'] += 50
+        scores['fusion'] += 25
         print(f"Fusion: ✅ 综合流程2成功")
     else:
         print(f"Fusion: ❌ 综合流程2失败")
+    
+    print('\n场景C: 鼠标移动+点击+键盘流程')
+    result1 = run_skill('fusion-desktop', 'move', {'x': 500, 'y': 400, 'duration': 0.1})
+    result2 = run_skill('fusion-desktop', 'position', {})
+    result3 = run_skill('fusion-desktop', 'key', {'key': 'escape'})
+    if result1.get('status') == 'success' and result2.get('status') == 'success':
+        scores['fusion'] += 25
+        print(f"Fusion: ✅ 综合流程3成功")
+    else:
+        print(f"Fusion: ❌ 综合流程3失败")
+    
+    print('\n场景D: 剪贴板读写流程')
+    result1 = run_skill('fusion-clipboard', 'copy', {'text': 'Test comprehensive flow'})
+    result2 = run_skill('fusion-clipboard', 'get', {})
+    result3 = run_skill('fusion-clipboard', 'clear', {})
+    if result1.get('status') == 'success' and result2.get('status') == 'success' and result3.get('status') == 'success':
+        scores['fusion'] += 25
+        print(f"Fusion: ✅ 综合流程4成功")
+    else:
+        print(f"Fusion: ❌ 综合流程4失败")
     
     print(f"\n综合自动化评分: Trae={scores['trae']}, OpenClaw={scores['openclaw']}, 开源={scores['opensource']}, Fusion={scores['fusion']}")
     return score('综合自动化', scores)

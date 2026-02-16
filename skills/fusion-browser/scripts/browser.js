@@ -11,10 +11,24 @@ async function open(params) {
     try {
         browser = await chromium.launch({
             headless: headless,
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox', 
+                '--disable-dev-shm-usage', 
+                '--disable-gpu',
+                '--disable-software-rasterizer',
+                '--disable-extensions',
+                '--disable-background-networking',
+                '--disable-sync',
+                '--metrics-recording-only',
+                '--no-first-run',
+                '--disable-default-apps'
+            ]
         });
-        page = await browser.newPage();
-        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        page = await browser.newPage({
+            viewport: { width: 1280, height: 720 }
+        });
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
         const title = await page.title();
         return {
             status: 'success',
@@ -23,6 +37,11 @@ async function open(params) {
             title: title
         };
     } catch (e) {
+        if (browser) {
+            try { await browser.close(); } catch {}
+            browser = null;
+            page = null;
+        }
         return { status: 'error', action: 'open', message: e.message };
     }
 }

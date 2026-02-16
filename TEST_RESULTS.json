@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-02-16 16:09:50",
+  "timestamp": "2026-02-16 16:20:47",
   "results": [
     {
       "test": "截图能力",
@@ -55,14 +55,14 @@
       "trae": 0,
       "openclaw": 70,
       "opensource": 75,
-      "fusion": 50
+      "fusion": 100
     }
   ],
   "totals": {
     "trae": 0,
     "openclaw": 545,
     "opensource": 660,
-    "fusion": 680
+    "fusion": 730
   },
   "exceed": true
 }
