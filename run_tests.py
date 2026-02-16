@@ -37,9 +37,11 @@ def run_skill(skill_name, action, params):
     
     try:
         if skill_name == 'fusion-browser-win':
+            with open('/mnt/c/tmp/browser_params.json', 'w') as f:
+                json.dump(params, f)
             result = subprocess.run(
-                ['/mnt/c/Windows/System32/cmd.exe', '/c', 'node', 'C:\\tmp\\browser_win.js', action, params_file.name],
-                capture_output=True, text=True, timeout=60
+                ['node', '/mnt/c/tmp/browser_win.js', action, '/mnt/c/tmp/browser_params.json'],
+                capture_output=True, text=True, timeout=60, env=env
             )
         elif script_path.endswith('.py'):
             result = subprocess.run(
